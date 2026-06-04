@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematch - Discover Your Next Favorite Film</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container glass-effect">
+        <header class="hero-section">
+            <div class="hero-content">
+                <div class="logo">Cinematch</div>
+                <h1>Discover Movies Tailored to Your Taste</h1>
+                <p class="hero-subtitle">Mathematical Precision. Cinematic Insight.</p>
+            </div>
+        </header>
+
+        <main class="landing-main">
+            <section class="description-section">
+                <h3>About Our Recommendation Engine</h3>
+                <p class="landing-description">
+                    Welcome to <strong>Cinematch</strong>, a next-generation recommendation engine engineered for true film enthusiasts. Unlike traditional platforms that rely on simple genre tags or commercial algorithms, Cinematch uses advanced <strong>Natural Language Processing (NLP)</strong> to analyze the deeper thematic elements of cinema.
+                </p>
+                <p class="landing-description">
+                    Our system processes full movie descriptions, plot outlines, and thematic summaries using <strong>TF-IDF (Term Frequency-Inverse Document Frequency)</strong> vectorization. By converting written narratives into high-dimensional numerical vectors, we calculate the <strong>Cosine Similarity</strong> between films. This mathematical approach identifies subtle thematic, narrative, and stylistic connections that simple categories miss.
+                </p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h4>Semantic Search</h4>
+                        <p>Analyze plot summaries and hidden themes for connections that traditional genre classifications miss.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h4>Cosine Similarity</h4>
+                        <p>Leverage mathematical distance calculations to find films sharing identical thematic DNA.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⏳</div>
+                        <h4>Personal History</h4>
+                        <p>Create a secure account to track your discovery history and recall recommendations instantly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <p class="cta-text">Ready to find your next favorite film?</p>
+                <div class="cta-buttons">
+                    <a href="{{ url_for('auth', tab='login') }}" class="btn btn-secondary">Sign In</a>
+                    <a href="{{ url_for('auth', tab='register') }}" class="btn btn-primary">Create Account</a>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

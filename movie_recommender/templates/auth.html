@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematch - Sign In / Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container auth-container glass-effect">
+        <header class="auth-header">
+            <a href="{{ url_for('home') }}" class="back-home">&larr; Back to Home</a>
+            <div class="logo">Cinematch</div>
+        </header>
+
+        {% with messages = get_flashed_messages(category_filter=["error"]) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message error-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="auth-tabs">
+            <button id="tab-login-btn" class="tab-btn {% if default_tab == 'login' %}active{% endif %}" onclick="switchTab('login')">Sign In</button>
+            <button id="tab-register-btn" class="tab-btn {% if default_tab == 'register' %}active{% endif %}" onclick="switchTab('register')">Create Account</button>
+        </div>
+
+        <div class="auth-form-wrapper">
+            <!-- Login Form -->
+            <form id="login-form" action="{{ url_for('login') }}" method="POST" class="auth-form {% if default_tab != 'login' %}hidden{% endif %}">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" name="username" placeholder="Enter your username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" action="{{ url_for('register') }}" method="POST" class="auth-form {% if default_tab != 'register' %}hidden{% endif %}">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" name="username" placeholder="Choose a username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" name="password" placeholder="Minimum 6 characters" required autocomplete="new-password" minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const loginBtn = document.getElementById('tab-login-btn');
+            const registerBtn = document.getElementById('tab-register-btn');
+            const flashMessages = document.querySelector('.flash-messages');
+
+            // Hide flashes when switching tabs to avoid confusion
+            if (flashMessages) {
+                flashMessages.style.display = 'none';
+            }
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loginBtn.classList.add('active');
+                registerBtn.classList.remove('active');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                loginBtn.classList.remove('active');
+                registerBtn.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

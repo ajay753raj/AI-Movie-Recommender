@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematch - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container dashboard-container glass-effect">
+        <header class="dashboard-header">
+            <div class="logo">Cinematch</div>
+            <div class="user-menu">
+                <span class="user-greeting">Welcome, <strong>{{ username }}</strong>!</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout">Sign Out</a>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="main-panel">
+                <div class="selection-area">
+                    <label for="movie-select">Choose a movie to find matches:</label>
+                    <div class="custom-select-wrapper">
+                        <select id="movie-select">
+                            <option value="" disabled selected>Select a movie to begin...</option>
+                            {% for movie in movie_list %}
+                                <option value="{{ movie }}">{{ movie }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button id="recommend-btn">Get Recommendations</button>
+                </div>
+
+                <div id="results" class="results-section hidden">
+                    <h2>Top Recommendations For You</h2>
+                    <ul id="recommendation-list">
+                        <!-- Recommendations will be populated here -->
+                    </ul>
+                </div>
+                
+                <div id="loading" class="hidden">
+                    <div class="spinner"></div>
+                    <p>Analyzing movies using TF-IDF & Cosine Similarity...</p>
+                </div>
+                <div id="error" class="hidden">
+                    <p>Could not find recommendations. Please try again.</p>
+                </div>
+            </div>
+
+            <aside class="sidebar-panel">
+                <div class="sidebar-header">
+                    <h3>Recent Searches</h3>
+                </div>
+                <ul id="history-list">
+                    {% if history %}
+                        {% for movie in history %}
+                            <li class="history-item" onclick="searchFromHistory('{{ movie | replace("'", "\\'") }}')">
+                                <span class="history-icon">🍿</span>
+                                <span class="history-text">{{ movie }}</span>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="history-empty">Your search history will appear here.</li>
+                    {% endif %}
+                </ul>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        // Trigger recommendations from click on search history
+        function searchFromHistory(movieName) {
+            const movieSelect = document.getElementById('movie-select');
+            movieSelect.value = movieName;
+            document.getElementById('recommend-btn').click();
+        }
+
+        // Dynamically update recent searches in UI without reloading
+        function updateHistoryUI(historyList) {
+            const historyListEl = document.getElementById('history-list');
+            if (!historyListEl) return;
+            
+            if (historyList && historyList.length > 0) {
+                historyListEl.innerHTML = '';
+                historyList.forEach(movie => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    
+                    // Escape quote characters for safely setting inline onclick function
+                    const escapedMovie = movie.replace(/'/g, "\\'");
+                    li.setAttribute('onclick', `searchFromHistory('${escapedMovie}')`);
+                    
+                    li.innerHTML = `
+                        <span class="history-icon">🍿</span>
+                        <span class="history-text">${movie}</span>
+                    `;
+                    historyListEl.appendChild(li);
+                });
+            } else {
+                historyListEl.innerHTML = '<li class="history-empty">Your search history will appear here.</li>';
+            }
+        }
+
+        // Fetch Recommendations Logic
+        document.getElementById('recommend-btn').addEventListener('click', function() {
+            const selectedMovie = document.getElementById('movie-select').value;
+            if (!selectedMovie) {
+                alert('Please select a movie first.');
+                return;
+            }
+
+            const resultsSection = document.getElementById('results');
+            const recommendationList = document.getElementById('recommendation-list');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+
+            resultsSection.classList.add('hidden');
+            error.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('movie', selectedMovie);
+
+            fetch('/recommend', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/auth';
+                    throw new Error('Unauthorized');
+                }
+                return response.json();
+            })
+            .then(data => {
+                loading.classList.add('hidden');
+                if (data.recommendations && data.recommendations.length > 0) {
+                    recommendationList.innerHTML = '';
+                    data.recommendations.forEach((movie, index) => {
+                        const li = document.createElement('li');
+                        li.className = 'movie-item';
+                        li.style.animationDelay = `${index * 0.08}s`;
+                        li.innerHTML = `
+                            <div class="movie-rank">#${index + 1}</div>
+                            <div class="movie-info">
+                                <div class="movie-title">${movie.Title}</div>
+                                <div class="movie-genre">${movie.Genre}</div>
+                            </div>
+                        `;
+                        recommendationList.appendChild(li);
+                    });
+                    resultsSection.classList.remove('hidden');
+                    
+                    // Update search history side panel dynamically
+                    if (data.history) {
+                        updateHistoryUI(data.history);
+                    }
+                } else {
+                    error.classList.remove('hidden');
+                }
+            })
+            .catch(err => {
+                if (err.message !== 'Unauthorized') {
+                    console.error('Error:', err);
+                    loading.classList.add('hidden');
+                    error.classList.remove('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
